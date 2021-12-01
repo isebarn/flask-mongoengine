@@ -1,0 +1,7 @@
+.env
+*__pycache__*
+*.sublime-project
+*.sublime-workspace
+main.py
+endpoints/admin.py
+models/__init__.py

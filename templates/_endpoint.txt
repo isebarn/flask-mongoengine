@@ -1,0 +1,15 @@
+    @api.route("/controller")
+    class CONTROLLERController(Resource):
+
+        @api.marshal_list_with(RESTX_MODEL)
+        def get(self):
+            return models.MODEL.get(**request.args.to_dict())
+
+        @api.marshal_with(RESTX_MODEL)
+        def post(self):
+            return models.MODEL(**request.get_json()).to_json()
+
+        @api.marshal_with(RESTX_MODEL)
+        def patch(self):
+            return models.MODEL.set(**request.get_json()).to_json()
+

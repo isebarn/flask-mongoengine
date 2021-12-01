@@ -1,0 +1,10 @@
+table image {
+  id int [pk, increment]
+  url varchar
+}
+
+table product {
+  id int [pk, increment]
+  name varchar
+  image int [ref: > image.id]
+}

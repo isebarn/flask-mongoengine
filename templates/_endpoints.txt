@@ -1,0 +1,31 @@
+# Standard library imports
+import os
+
+# Third party imports
+from flask import Flask
+from flask import request
+from flask_restx import Namespace
+from flask_restx import Resource
+from flask_restx import Api
+from flask_restx.fields import DateTime
+from flask_restx.fields import Float
+from flask_restx.fields import List
+from flask_restx.fields import Nested
+from flask_restx.fields import String
+from flask_restx.fields import Boolean
+
+# Local application imports
+import models
+
+app = Flask(__name__)
+api = Api(app)
+
+def get_api():
+    api = Namespace("Endpoints", description="")
+
+    oid = api.model("oid", { "$oid": String})
+    base = api.model("base", {
+        "_cls": String,
+        "_id": Nested(oid)
+    })
+
