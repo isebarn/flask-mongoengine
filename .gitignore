@@ -5,3 +5,4 @@
 main.py
 endpoints/admin.py
 models/__init__.py
+endpoints/__init__.py

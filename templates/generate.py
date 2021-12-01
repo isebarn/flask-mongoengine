@@ -31,9 +31,7 @@ for line in [x.strip() for x in Lines]:
         )
 
         restx_model.append(
-            "    {} = api.clone('{}', base, {{\n".format(
-                classname, classname.capitalize()
-            )
+            "{} = api.clone('{}', base, {{\n".format(classname, classname.capitalize())
         )
 
         in_class = True
@@ -48,7 +46,7 @@ for line in [x.strip() for x in Lines]:
         elif line.startswith("}"):
             in_class = False
             class_string.append("\n\n")
-            restx_model.append("    })\n\n")
+            restx_model.append("})\n\n")
 
         else:
             class_string.append("    {} = ".format(line.split()[0]))
@@ -59,20 +57,20 @@ for line in [x.strip() for x in Lines]:
                     "ReferenceField({})\n".format(ref_field.capitalize())
                 )
                 restx_model.append(
-                    "        '{}': Nested({}),\n".format(line.split()[0], ref_field)
+                    "    '{}': Nested({}),\n".format(line.split()[0], ref_field)
                 )
             elif line.split()[1] == "varchar":
                 class_string.append("StringField()\n")
-                restx_model.append("        '{}': String,\n".format(line.split()[0]))
+                restx_model.append("    '{}': String,\n".format(line.split()[0]))
             elif line.split()[1] == "datetime":
                 class_string.append("DateTimeField()\n")
-                restx_model.append("        '{}': DateTime,\n".format(line.split()[0]))
+                restx_model.append("    '{}': DateTime,\n".format(line.split()[0]))
             elif line.split()[1] == "float":
                 class_string.append("FloatField()\n")
-                restx_model.append("        '{}': Float,\n".format(line.split()[0]))
+                restx_model.append("    '{}': Float,\n".format(line.split()[0]))
             elif line.split()[1] == "boolean":
                 class_string.append("BooleanField(default=False)\n")
-                restx_model.append("        '{}': Boolean,\n".format(line.split()[0]))
+                restx_model.append("    '{}': Boolean,\n".format(line.split()[0]))
 
 
 file = open("../models/__init__.py", "w")
@@ -88,7 +86,7 @@ file.close()
 api_document = open("./_endpoints.txt", "r")
 api_document = api_document.readlines()
 
-file = open("../endpoints/admin.py", "w")
+file = open("../endpoints/__init__.py", "w")
 file.writelines(api_document)
 file.writelines(restx_model)
 file.writelines("\n\n")
@@ -108,7 +106,7 @@ for item in classes:
 
     file.writelines(controller_template)
 
-file.writelines(["    return api\n\n"])
+# file.writelines(["    return api\n\n"])
 file.close()
 
 main_file = open("./main.txt", "r")
@@ -117,5 +115,4 @@ main.writelines(main_file)
 main_file.close()
 main.close()
 
-system("python3 -m black ../endpoints/admin.py")
-system("python3 -m black ../models/__init__.py")
+system("python3 -m black ../")

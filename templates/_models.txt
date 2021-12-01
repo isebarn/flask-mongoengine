@@ -6,6 +6,7 @@ from pprint import pformat
 
 # Third party imports
 from bson import json_util
+from bson.objectid import ObjectId
 from mongoengine import connect
 from mongoengine import DateTimeField
 from mongoengine import Document
@@ -19,7 +20,13 @@ user = os.environ.get("DB_USER", "")
 password = os.environ.get("DB_PWD", "")
 host = os.environ.get("DB_HOST") or "mongodb+srv://{}".format(host)
 database_name = os.environ.get("DB_NAME", "")
-db = connect(db=database_name, username=user, password=password, host=host)
+db = connect(
+    database_name,
+    username=user,
+    password=password,
+    host=host,
+    authentication_source="admin",
+)
 
 class Extended(Document):
     meta = {"abstract": True, "allow_inheritance": True}
@@ -37,15 +44,30 @@ class Extended(Document):
                     # link to existing
                     if isinstance(kwargs[key], Document):
                         setattr(self, key, kwargs[key])
+
+                    # pass entire object
                     elif "_id" in kwargs[key]:
                         setattr(
                             self,
                             key,
                             value.document_type_obj.objects.get(id=kwargs[key]["_id"]),
                         )
+
+                    # pass ObjectId string of object
+                    elif ObjectId.is_valid(kwargs.get(key, "")):
+                        setattr(
+                            self,
+                            key,
+                            value.document_type_obj.objects.get(id=kwargs[key]),
+                        )
+
                     # create new ReferenceField
                     else:
-                        setattr(self, key, value.document_type_obj(**kwargs[key]))
+                        setattr(
+                            self,
+                            key,
+                            value.document_type_obj(**{key: {"_id": kwargs[key]}}),
+                        )
 
             self.save()
 

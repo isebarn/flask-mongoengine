@@ -7,9 +7,9 @@ from flask_restx import Api
 
 
 # Local application imports
-from endpoints.admin import get_api
+from endpoints import api as _api
 
 
 app = Flask("api")
 api = Api(app)
-api.add_namespace(get_api())
+api.add_namespace(_api)

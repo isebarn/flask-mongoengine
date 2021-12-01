@@ -20,12 +20,11 @@ import models
 app = Flask(__name__)
 api = Api(app)
 
-def get_api():
-    api = Namespace("Endpoints", description="")
+api = Namespace("api", description="")
 
-    oid = api.model("oid", { "$oid": String})
-    base = api.model("base", {
-        "_cls": String,
-        "_id": Nested(oid)
-    })
+oid = api.model("oid", { "$oid": String})
+base = api.model("base", {
+    "_cls": String,
+    "_id": Nested(oid)
+})
 

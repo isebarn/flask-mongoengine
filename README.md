@@ -1,7 +1,7 @@
 # .env
 
 	FLASK_APP=main
-	FLASK_ENVIRONMENT=development
+	FLASK_ENV=development
 
 	DB_USER=<user>
 	DB_PWD=<password>

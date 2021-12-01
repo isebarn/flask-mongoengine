@@ -1,0 +1,22 @@
+# http://docs.python-requests.org/en/master/user/quickstart/
+
+env_file = ''
+
+###env
+url = "http://127.0.0.1:5000/api/{}"
+images = "images"
+products = "products"
+###env
+
+get(url.format(images))
+
+post(url.format(images), json={
+	"url": "asd"	
+}, name="image")
+
+
+get(url.format(products))
+post(url.format(products), json={
+	"name": "dsa",
+	"image": image.json()["_id"]["$oid"]
+})
