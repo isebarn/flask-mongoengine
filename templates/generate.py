@@ -71,6 +71,9 @@ for line in [x.strip() for x in Lines]:
             elif line.split()[1] == "boolean":
                 class_string.append("BooleanField(default=False)\n")
                 restx_model.append("    '{}': Boolean,\n".format(line.split()[0]))
+            elif line.split()[1] == "dict":
+                class_string.append("DictField()\n")
+                restx_model.append("    '{}': Raw(),\n".format(line.split()[0]))
 
 
 file = open("../models/__init__.py", "w")

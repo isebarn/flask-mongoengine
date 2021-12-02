@@ -13,6 +13,7 @@ from flask_restx.fields import List
 from flask_restx.fields import Nested
 from flask_restx.fields import String
 from flask_restx.fields import Boolean
+from flask_restx.fields import Raw
 
 # Local application imports
 import models

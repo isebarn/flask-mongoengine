@@ -14,6 +14,7 @@ from mongoengine import FloatField
 from mongoengine import BooleanField
 from mongoengine import ReferenceField
 from mongoengine import StringField
+from mongoengine import DictField
 from mongoengine import signals
 
 user = os.environ.get("DB_USER", "")
@@ -68,6 +69,10 @@ class Extended(Document):
                             key,
                             value.document_type_obj(**{key: {"_id": kwargs[key]}}),
                         )
+
+                # special for Raw fields that are wildcards
+                elif isinstance(value, DictField) and isinstance(kwargs.get(key), dict):
+                    setattr(self, key, kwargs.get(key))
 
             self.save()
 

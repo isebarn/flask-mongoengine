@@ -1,6 +1,7 @@
 table image {
   id int [pk, increment]
   url varchar
+  fields dict
 }
 
 table product {

@@ -11,7 +11,10 @@ products = "products"
 get(url.format(images))
 
 post(url.format(images), json={
-	"url": "asd"	
+	"url": "asd",
+	"fields": {
+		"god": 1
+	}
 }, name="image")
 
 
