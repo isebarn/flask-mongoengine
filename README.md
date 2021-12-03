@@ -20,6 +20,7 @@ You must have the `.env` file configured
 # How to create a collection
 
 If you need a collection called *User* with the fields
+
 	User
 		id
 		name
