@@ -1,3 +1,12 @@
+# How to run it
+You need pipenv installed and then you do
+
+	pipenv install
+	pipenv shell
+	flask run
+
+You must have the `.env` file configured
+
 # .env
 
 	FLASK_APP=main
