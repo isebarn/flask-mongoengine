@@ -9,3 +9,12 @@ table product {
   name varchar
   image int [ref: > image.id]
 }
+
+table user {
+  id int [pk, increment]
+  name varchar
+  birthday datetime
+  age float
+  alive boolean
+  facts dict
+}

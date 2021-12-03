@@ -12,7 +12,7 @@ restx_model = []
 
 # models go in singular and come out plural
 # sellers: seller
-path_dict = {"image": "images", "product": "products"}
+path_dict = {"image": "images", "product": "products", "user": "users"}
 
 
 in_class = False
@@ -64,7 +64,11 @@ for line in [x.strip() for x in Lines]:
                 restx_model.append("    '{}': String,\n".format(line.split()[0]))
             elif line.split()[1] == "datetime":
                 class_string.append("DateTimeField()\n")
-                restx_model.append("    '{}': DateTime,\n".format(line.split()[0]))
+                restx_model.append(
+                    "    '{}': DateTime(attribute=lambda x: datetime.fromtimestamp(x.get('{}', {{}}).get('$date', 0)/1e3)),\n".format(
+                        line.split()[0], line.split()[0]
+                    )
+                )
             elif line.split()[1] == "float":
                 class_string.append("FloatField()\n")
                 restx_model.append("    '{}': Float,\n".format(line.split()[0]))

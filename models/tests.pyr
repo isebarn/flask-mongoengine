@@ -6,6 +6,7 @@ env_file = ''
 url = "http://127.0.0.1:5000/api/{}"
 images = "images"
 products = "products"
+users = "users"
 ###env
 
 get(url.format(images))
@@ -19,7 +20,16 @@ post(url.format(images), json={
 
 
 get(url.format(products))
-post(url.format(products), json={
-	"name": "dsa",
-	"image": image.json()["_id"]["$oid"]
+
+
+post(url.format(users), json={
+	"name": "John",
+	"birthday": "2021-01-01",
+	"age": 12,
+	"alive": True,
+	"facts": {
+		"fears": ["bees", "honey"],
+		"likes": ["beers", "honeys"],
+		"salary": 30000
+	}
 })
