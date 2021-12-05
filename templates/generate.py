@@ -1,4 +1,12 @@
 from os import system
+from os import path
+from os import makedirs
+
+if not path.exists("../endpoints"):
+    makedirs("../endpoints")
+
+if not path.exists("../models"):
+    makedirs("../models")
 
 file = open("schema.txt", "r")
 Lines = file.readlines()
@@ -103,7 +111,8 @@ for item in classes:
     controller_template = controller_template.readlines()
     controller_template = "".join(controller_template)
     controller_template = controller_template.replace(
-        "CONTROLLER", "".join([x.capitalize() for x in path_dict[item].split("_")])
+        "CONTROLLER",
+        "".join([x.capitalize() for x in path_dict.get(item, item).split("_")]),
     )
     controller_template = controller_template.replace("controller", path_dict[item])
     controller_template = controller_template.replace("RESTX_MODEL", item)

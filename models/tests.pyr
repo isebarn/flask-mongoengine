@@ -9,27 +9,24 @@ products = "products"
 users = "users"
 ###env
 
-get(url.format(images))
-
-post(url.format(images), json={
-	"url": "asd",
-	"fields": {
-		"god": 1
-	}
-}, name="image")
-
-
-get(url.format(products))
-
+get(url.format(users))
 
 post(url.format(users), json={
-	"name": "John",
+	"name": "Ani",
 	"birthday": "2021-01-01",
-	"age": 12,
+	"age": 24,
 	"alive": True,
 	"facts": {
 		"fears": ["bees", "honey"],
 		"likes": ["beers", "honeys"],
 		"salary": 30000
 	}
+})
+
+patch(url.format(users), json={
+  "_cls": "User",
+  "_id": {
+    "$oid": "61aa125dc70bac5719eb0f83"
+  },
+  "age": 20.0,
 })
