@@ -4,29 +4,34 @@ env_file = ''
 
 ###env
 url = "http://127.0.0.1:5000/api/{}"
-images = "images"
 products = "products"
-users = "users"
+variants = "variants"
+features = "features"
 ###env
 
-get(url.format(users))
+post(url.format(features), json={
+	"feature": "feature_1"	
+}, name="feature_1")
 
-post(url.format(users), json={
-	"name": "Ani",
-	"birthday": "2021-01-01",
-	"age": 24,
-	"alive": True,
-	"facts": {
-		"fears": ["bees", "honey"],
-		"likes": ["beers", "honeys"],
-		"salary": 30000
-	}
+post(url.format(features), json={
+	"feature": "feature_2"	
+}, name="feature_2")
+
+
+post(url.format(variants), json={
+	"variant": "variant 1",
+	"features": [
+		feature_1.json(),
+		feature_2.json()
+	]
+}, name="variant_1")
+
+
+
+post(url.format(products), json={
+	"product": "product 1",
+	"variants": [
+		variant_1.json()
+	]
 })
 
-patch(url.format(users), json={
-  "_cls": "User",
-  "_id": {
-    "$oid": "61aa125dc70bac5719eb0f83"
-  },
-  "age": 20.0,
-})

@@ -20,7 +20,7 @@ restx_model = []
 
 # models go in singular and come out plural
 # sellers: seller
-path_dict = {"image": "images", "product": "products", "user": "users"}
+path_dict = {"product": "products", "variant": "variants", "feature": "features"}
 
 
 in_class = False
@@ -60,13 +60,30 @@ for line in [x.strip() for x in Lines]:
             class_string.append("    {} = ".format(line.split()[0]))
 
             if "[ref:" in line:
-                ref_field = line.split("> ")[-1].split(".")[0]
-                class_string.append(
-                    "ReferenceField({})\n".format(ref_field.capitalize())
-                )
-                restx_model.append(
-                    "    '{}': Nested({}),\n".format(line.split()[0], ref_field)
-                )
+                if ">" in line:
+                    ref_field = line.split("> ")[-1].split(".")[0]
+                    class_string.append(
+                        "ReferenceField({})\n".format(
+                            "".join([x.capitalize() for x in ref_field.split("_")])
+                        )
+                    )
+                    restx_model.append(
+                        "    '{}': Nested({}),\n".format(line.split()[0], ref_field)
+                    )
+
+                elif "<" in line:
+                    ref_field = line.split("< ")[-1].split(".")[0]
+                    class_string.append(
+                        "ListField(ReferenceField({}))\n".format(
+                            "".join([x.capitalize() for x in ref_field.split("_")])
+                        )
+                    )
+                    restx_model.append(
+                        "    '{}': List(Nested({})),\n".format(
+                            path_dict[ref_field], ref_field
+                        )
+                    )
+
             elif line.split()[1] == "varchar":
                 class_string.append("StringField()\n")
                 restx_model.append("    '{}': String,\n".format(line.split()[0]))
@@ -122,7 +139,6 @@ for item in classes:
 
     file.writelines(controller_template)
 
-# file.writelines(["    return api\n\n"])
 file.close()
 
 main_file = open("./main.txt", "r")

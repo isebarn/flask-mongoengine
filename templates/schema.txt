@@ -1,20 +1,16 @@
-table image {
+table feature {
   id int [pk, increment]
-  url varchar
-  fields dict
+  feature varchar
+}
+
+table variant {
+  id int [pk, increment]
+  variant varchar
+  features int [ref: < feature.id]
 }
 
 table product {
   id int [pk, increment]
-  name varchar
-  image int [ref: > image.id]
-}
-
-table user {
-  id int [pk, increment]
-  name varchar
-  birthday datetime
-  age float
-  alive boolean
-  facts dict
+  product varchar
+  variants int [ref: < variant.id]
 }
