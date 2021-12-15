@@ -30,6 +30,7 @@ db = connect(
     authentication_source="admin",
 )
 
+
 class Extended(Document):
     meta = {"abstract": True, "allow_inheritance": True}
 
@@ -78,12 +79,18 @@ class Extended(Document):
             self.save()
 
     def to_json(self):
+
         return {
             **loads(json_util.dumps(self.to_mongo())),
             **{
                 key: getattr(self, key).to_json()
                 for key, value in self._fields.items()
                 if isinstance(value, ReferenceField) and getattr(self, key)
+            },
+            **{
+                key: [x.to_json() for x in getattr(self, key)]
+                for key, value in self._fields.items()
+                if isinstance(value, ListField) and getattr(self, key)
             },
         }
 
@@ -92,9 +99,15 @@ class Extended(Document):
         _id = kwargs.pop("_id")
         item = cls.objects.get(id=_id["$oid"])
         for key, value in kwargs.items():
+            if isinstance(value, list) and any(value):
+                string_object_ids = [x.get("_id", {}).get("$oid") for x in value]
+                if all(map(lambda x: ObjectId.is_valid(x), string_object_ids)):
+                    value = [ObjectId(x) for x in string_object_ids]
+
             setattr(item, key, value)
 
         item.save()
+
         return cls.objects.get(id=_id["$oid"])
 
     @classmethod
@@ -134,4 +147,3 @@ class Extended(Document):
             and next(cls.objects(id=document.id)).status is not document.status
         ):
             pass
-
