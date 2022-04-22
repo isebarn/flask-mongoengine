@@ -1,16 +1,5 @@
-table feature {
-  id int [pk, increment]
-  feature varchar
-}
 
-table variant {
-  id int [pk, increment]
-  variant varchar
-  features int [ref: < feature.id]
-}
-
-table product {
-  id int [pk, increment]
-  product varchar
-  variants int [ref: < variant.id]
+table animal {
+  id integer [pk, increment]
+  name varchar
 }

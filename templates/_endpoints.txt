@@ -5,11 +5,13 @@ from datetime import datetime
 # Third party imports
 from flask import Flask
 from flask import request
+from flask import g
 from flask_restx import Namespace
 from flask_restx import Resource
 from flask_restx import Api
 from flask_restx.fields import DateTime
 from flask_restx.fields import Float
+from flask_restx.fields import Integer
 from flask_restx.fields import List
 from flask_restx.fields import Nested
 from flask_restx.fields import String
@@ -23,10 +25,3 @@ app = Flask(__name__)
 api = Api(app)
 
 api = Namespace("api", description="")
-
-oid = api.model("oid", { "$oid": String})
-base = api.model("base", {
-    "_cls": String,
-    "_id": Nested(oid)
-})
-
