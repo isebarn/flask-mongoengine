@@ -7,8 +7,7 @@ from flask import Flask
 from flask import request
 from flask import g
 from flask_restx import Namespace
-from flask_restx import Resource
-from flask_restx import Api
+from flask_restx import Resource as _Resource
 from flask_restx.fields import DateTime
 from flask_restx.fields import Float
 from flask_restx.fields import Integer
@@ -21,7 +20,19 @@ from flask_restx.fields import Raw
 # Local application imports
 import models
 
-app = Flask(__name__)
-api = Api(app)
+class Resource(_Resource):
+    dispatch_requests = []
+
+    def __init__(self, api=None, *args, **kwargs):
+        super(Resource, self).__init__(api, args, kwargs)
+
+    def dispatch_request(self, *args, **kwargs):
+        tmp = request.args.to_dict()
+        request.args = tmp
+
+        for method in self.dispatch_requests:
+            method(self, args, kwargs)
+
+        return super(Resource, self).dispatch_request(*args, **kwargs)
 
 api = Namespace("api", description="")

@@ -8,8 +8,12 @@ from flask_restx import Api
 
 # Local application imports
 from endpoints import api as _api
+from extensions import api_list
 
 
 app = Flask("api")
 api = Api(app)
 api.add_namespace(_api)
+
+for extension in api_list:
+	api.add_namespace(extension)
