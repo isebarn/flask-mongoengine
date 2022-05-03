@@ -68,8 +68,8 @@ class StringField(_StringField):
     marshal = String
 
 
-user = environ.get("username")
-password = environ.get("password")
+user = environ.get("username", "root")
+password = environ.get("password", "root")
 host = environ.get("host", "127.0.0.1")
 database_name = environ.get("DB_NAME", "data")
 
@@ -140,21 +140,12 @@ class Extended(Document):
 
             self.save()
 
-    def to_json(self, recursive=True):
+    def to_json(self):
         return {
-            **loads(json_util.dumps(self.to_mongo())),
             **{
-                key: getattr(self, key).to_json()
-                for key, value in self._fields.items()
-                if recursive 
-                and isinstance(value, ReferenceField)
-                and getattr(self, key)
-            },
-            **{
-                key: [x.to_json() for x in getattr(self, key)]
-                for key, value in self._fields.items()
-                if recursive and isinstance(value, ListField) and getattr(self, key)
-            },
+                k: (v["$oid"] if isinstance(v, dict) and "$oid" in v else v)
+                for k, v in loads(json_util.dumps(self.to_mongo())).items()
+            }
         }
 
     @classmethod
@@ -181,6 +172,7 @@ class Extended(Document):
     @classmethod
     def get(cls, *args, **kwargs):
         def recursively_query(model, fields, search, root=False):
+
             if "__" not in fields:
                 if root:
                     return {fields: search}
@@ -201,7 +193,7 @@ class Extended(Document):
         for query, search in kwargs.items():
             if query.startswith("$"):
                 continue
-            
+
             filters.update(
                 {
                     key: list(set(value) & set(filters.get(key, value)))
@@ -240,8 +232,8 @@ class Extended(Document):
                 for key, value in list(cls._fields.items())
                 if hasattr(getattr(cls, key), "marshal")
             },
-            "_id": String(attribute=lambda x: x["_id"]["$oid"]),            
-            "id": String(attribute=lambda x: x["_id"]["$oid"])
+            "_id": String(attribute=lambda x: x["_id"]["$oid"]),
+            "id": String(attribute=lambda x: x["_id"]["$oid"]),
         }
 
     @classmethod
@@ -266,4 +258,32 @@ class Extended(Document):
             },
         }
 
+    @classmethod
+    def _reference_fields(cls):
+        return {
+            key: value
+            for key, value in cls._fields.items()
+            if isinstance(value, ReferenceField)
+        }
 
+
+    @classmethod
+    def fetch(cls, filters={}, include=[]):
+        data = [x.to_json() for x in list(cls.get(**filters))]
+
+        for key, value in cls._reference_fields().items():
+            if key in include:
+                ids = list(map(lambda x: x[key], data))
+                values = value.document_type_obj.fetch(
+                    {"$id__in": ids},
+                    [
+                        x.replace("{}__".format(key), "")
+                        for x in include
+                        if x.startswith(key)
+                    ],
+                )
+                values = {x["_id"]: x for x in values}
+
+                list(map(lambda x: x.update({key: values[x[key]]}), data))
+
+        return data
