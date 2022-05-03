@@ -216,6 +216,7 @@ def initialize_file(source_name, new_name):
         new.close()
 
 
+initialize_file("Dockerfile", "Dockerfile")
 initialize_file("main.txt", "main.py")
 initialize_file(".env", ".env")
 initialize_file("requirements.txt", "requirements.txt")
