@@ -232,8 +232,7 @@ class Extended(Document):
                 for key, value in list(cls._fields.items())
                 if hasattr(getattr(cls, key), "marshal")
             },
-            "_id": String(attribute=lambda x: x["_id"]["$oid"]),
-            "id": String(attribute=lambda x: x["_id"]["$oid"]),
+            "_id": String(),
         }
 
     @classmethod
@@ -241,7 +240,7 @@ class Extended(Document):
         return {
             **cls.base(),
             **{
-                field: String(attribute=lambda x: x["_id"]["$oid"])
+                field: String(attribute=lambda x: x["_id"])
                 for field, instance in cls._fields.items()
                 if isinstance(instance, ReferenceField)
             },
@@ -252,7 +251,7 @@ class Extended(Document):
         return {
             **cls.base(),
             **{
-                field: Nested(api.models.get(field))
+                field: Nested(api.models.get(field), skip_none=True)
                 for field, instance in cls._fields.items()
                 if isinstance(instance, ReferenceField)
             },
@@ -266,24 +265,27 @@ class Extended(Document):
             if isinstance(value, ReferenceField)
         }
 
-
     @classmethod
-    def fetch(cls, filters={}, include=[]):
+    def fetch(cls, include=[], filters={}):
         data = [x.to_json() for x in list(cls.get(**filters))]
 
         for key, value in cls._reference_fields().items():
             if key in include:
                 ids = list(map(lambda x: x[key], data))
                 values = value.document_type_obj.fetch(
-                    {"$id__in": ids},
                     [
                         x.replace("{}__".format(key), "")
                         for x in include
                         if x.startswith(key)
                     ],
+                    {"$id__in": ids},
                 )
                 values = {x["_id"]: x for x in values}
 
                 list(map(lambda x: x.update({key: values[x[key]]}), data))
 
+            else:
+                list(map(lambda x: x.update({key: {"_id": x[key]}}), data))
+
         return data
+
