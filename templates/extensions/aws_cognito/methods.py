@@ -52,6 +52,12 @@ def user(access_token):
 #     )
 
 
+def admin_add_user_to_group(*args, **kwargs):
+    return client.admin_add_user_to_group(
+        UserPoolId=pool_id, Username=kwargs["username"], GroupName=kwargs["group"]
+    )
+
+
 def admin_create_user(*args, **kwargs):
     return {
         y["Name"].replace("custom:", ""): y["Value"]
