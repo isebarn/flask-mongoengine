@@ -27,11 +27,7 @@ class Resource(_Resource):
         super(Resource, self).__init__(api, args, kwargs)
 
     def dispatch_request(self, *args, **kwargs):
-        tmp = {"filters": request.args.to_dict()}
-
-        if "$include" in tmp["filters"]:
-            tmp["include"] = tmp["filters"]["$include"].split(",")
-
+        tmp = request.args.to_dict()
         request.args = tmp
 
         for method in self.dispatch_requests:

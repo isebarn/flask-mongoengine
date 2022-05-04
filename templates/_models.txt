@@ -266,19 +266,24 @@ class Extended(Document):
         }
 
     @classmethod
-    def fetch(cls, include=[], filters={}):
+    def fetch(cls, filters):
+        include = filters.pop("$include", "").split(",")
         data = [x.to_json() for x in list(cls.get(**filters))]
 
         for key, value in cls._reference_fields().items():
             if key in include:
                 ids = list(map(lambda x: x[key], data))
                 values = value.document_type_obj.fetch(
-                    [
-                        x.replace("{}__".format(key), "")
-                        for x in include
-                        if x.startswith(key)
-                    ],
-                    {"$id__in": ids},
+                    {
+                        "$include": ",".join(
+                            [
+                                x.replace("{}__".format(key), "")
+                                for x in include
+                                if x.startswith(key)
+                            ]
+                        ),
+                        "$id__in": ids,
+                    },
                 )
                 values = {x["_id"]: x for x in values}
 
@@ -288,4 +293,6 @@ class Extended(Document):
                 list(map(lambda x: x.update({key: {"_id": x[key]}}), data))
 
         return data
+
+
 
