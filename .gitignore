@@ -6,5 +6,5 @@ main.py
 endpoints/admin.py
 models
 endpoints
-extensions/*
+extensions
 Dockerfile
