@@ -190,8 +190,13 @@ class Extended(Document):
                 return [x.id for x in model.objects(**{fields: search})]
 
             prop, fields = fields.split("__", 1)
+
             result = recursively_query(
-                model._fields[prop].document_type_obj, fields, search
+                model._fields[prop].field.document_type_obj
+                if isinstance(model._fields[prop], ListField)
+                else model._fields[prop].document_type_obj,
+                fields,
+                search,
             )
 
             if not root:
@@ -350,4 +355,5 @@ class Extended(Document):
                 list(map(lambda x: x.update({key: {"_id": x[key]}}), data))
 
         return data
+
 
