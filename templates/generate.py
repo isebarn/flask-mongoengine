@@ -114,9 +114,6 @@ for line in [x.strip() for x in Lines]:
                             "".join([x.capitalize() for x in ref_field.split("_")])
                         )
                     )
-                    # restx_model.append(
-                    #     "    '{}': Nested({}),\n".format(line.split()[0], ref_field)
-                    # )
 
                 elif "<" in line:
                     ref_field = line.split("< ")[-1].split(".")[0]
@@ -125,41 +122,21 @@ for line in [x.strip() for x in Lines]:
                             "".join([x.capitalize() for x in ref_field.split("_")])
                         )
                     )
-                    # restx_model.append(
-                    #     "    '{}': List(Nested({})),\n".format(
-                    #         path_dict[ref_field], ref_field
-                    #     )
-                    # )
 
             elif line.split()[1] == "integer":
                 class_string.append("IntField()\n")
-                # restx_model.append("    '{}': Float,\n".format(line.split()[0]))
             elif line.split()[1] == "varchar":
                 class_string.append("StringField()\n")
-                # restx_model.append("    '{}': String,\n".format(line.split()[0]))
             elif line.split()[1] == "datetime":
                 class_string.append("DateTimeField()\n")
-                # restx_model.append(
-                #     "    '{}': DateTime(attribute=lambda x: datetime.fromtimestamp(x.get('{}', {{}}).get('$date', 0)/1e3)),\n".format(
-                #         line.split()[0], line.split()[0]
-                #     )
-                # )
             elif line.split()[1] == "float":
                 class_string.append("FloatField()\n")
-                # restx_model.append("    '{}': Float,\n".format(line.split()[0]))
             elif line.split()[1] == "boolean":
                 class_string.append("BooleanField(default=False)\n")
-                # restx_model.append("    '{}': Boolean,\n".format(line.split()[0]))
             elif line.split()[1] == "dict":
                 class_string.append("DictField()\n")
-                # restx_model.append("    '{}': Raw(),\n".format(line.split()[0]))
             elif ":" in line.split()[1]:
                 class_string.append("{}()\n".format(line.split()[1].split(":")[1]))
-                # restx_model.append(
-                #     "    '{}': {},\n".format(
-                #         line.split()[0], line.split()[1].split(":")[1]
-                #     )
-                # )
 
 
 file = open("../models/__init__.py", "w")

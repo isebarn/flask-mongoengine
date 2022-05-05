@@ -141,17 +141,22 @@ class Extended(Document):
             self.save()
 
     def to_json(self):
-        return {
-            **{
-                k: (v["$oid"] if isinstance(v, dict) and "$oid" in v else v)
-                for k, v in loads(json_util.dumps(self.to_mongo())).items()
-            }
-        }
+        def f(v):
+            if isinstance(v, dict) and "$oid" in v:
+                return v["$oid"]
+            elif isinstance(v, list):
+                return list(map(lambda x: f(x), v))
+            else:
+                return v
+
+        return {**{k: f(v) for k, v in loads(json_util.dumps(self.to_mongo())).items()}}
 
     @classmethod
     def set(cls, *args, **kwargs):
-        _id = kwargs.pop("_id")
+        _id = kwargs.pop("id")
         item = cls.objects.get(id=_id)
+
+        # ???
         for key, value in kwargs.items():
             if isinstance(value, list) and any(value):
                 string_object_ids = [x.get("_id", {}).get("$oid") for x in value]
@@ -160,7 +165,9 @@ class Extended(Document):
 
         cls.objects(id=_id).update_one(
             **{
-                "set__{}".format(key): (
+                key.replace("$", "")
+                if key.startswith("$")
+                else "set__{}".format(key): (
                     ObjectId(value) if ObjectId.is_valid(value) else value
                 )
                 for key, value in kwargs.items()
@@ -172,6 +179,9 @@ class Extended(Document):
     @classmethod
     def get(cls, *args, **kwargs):
         def recursively_query(model, fields, search, root=False):
+
+            if fields == "id__in":
+                return {fields: search}
 
             if "__" not in fields:
                 if root:
@@ -255,6 +265,18 @@ class Extended(Document):
                 for field, instance in cls._fields.items()
                 if isinstance(instance, ReferenceField)
             },
+            **{
+                field: List(
+                    Nested(
+                        api.models.get(
+                            instance.field.document_type_obj._class_name.lower()
+                        ),
+                        skip_none=True,
+                    ),
+                )
+                for field, instance in cls._fields.items()
+                if isinstance(instance, ListField)
+            },
         }
 
     @classmethod
@@ -266,9 +288,44 @@ class Extended(Document):
         }
 
     @classmethod
+    def _list_reference_fields(cls):
+        return {
+            key: value
+            for key, value in cls._fields.items()
+            if isinstance(value, ListField)
+            and isinstance(cls._fields[key].field, ReferenceField)
+        }
+
+    @classmethod
     def fetch(cls, filters):
         include = filters.pop("$include", "").split(",")
         data = [x.to_json() for x in list(cls.get(**filters))]
+
+        for key, value in cls._list_reference_fields().items():
+            if key in include:
+                id_lists = list(map(lambda x: x[key], data))
+                ids = list(set([item for sublist in id_lists for item in sublist]))
+
+                values = value.field.document_type_obj.fetch(
+                    {
+                        "$include": ",".join(
+                            [
+                                x.replace("{}__".format(key), "")
+                                for x in include
+                                if x.startswith(key)
+                            ]
+                        ),
+                        "id__in": ids,
+                    },
+                )
+                values = {x["_id"]: x for x in values}
+
+                for item in data:
+                    item.update({key: [values[x] for x in item[key]]})
+
+            else:
+                for item in data:
+                    item.update({key: [{"_id": x} for x in item[key]]})
 
         for key, value in cls._reference_fields().items():
             if key in include:
@@ -282,7 +339,7 @@ class Extended(Document):
                                 if x.startswith(key)
                             ]
                         ),
-                        "$id__in": ids,
+                        "id__in": ids,
                     },
                 )
                 values = {x["_id"]: x for x in values}
@@ -293,6 +350,4 @@ class Extended(Document):
                 list(map(lambda x: x.update({key: {"_id": x[key]}}), data))
 
         return data
-
-
 
