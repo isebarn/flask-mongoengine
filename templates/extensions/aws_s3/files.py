@@ -23,12 +23,6 @@ from extensions.aws_s3.methods import delete_object
 
 api = Namespace("aws_s3/files")
 
-# list all in bucket
-# return all from bucket
-# return one by name
-# upload file
-# delete file
-
 
 @api.route("/bucket_search")
 class FileSearch(Resource):
@@ -44,15 +38,15 @@ class FileRetrieval(Resource):
 
 @api.route("/file/<filename>")
 class File(Resource):
-    image_upload_parser = api.parser()
-    image_upload_parser.add_argument(
+    file_upload_parser = api.parser()
+    file_upload_parser.add_argument(
         "file", location="files", type=FileStorage, required=True
     )
 
     def get(self, filename):
         return generate_presigned_url(filename)
 
-    @api.expect(image_upload_parser)
+    @api.expect(file_upload_parser)
     def post(self, filename):
         file = request.files.get("file")
 

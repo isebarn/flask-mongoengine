@@ -28,7 +28,7 @@ def upload_file(file, filename, bucket=default_bucket):
         file,
         bucket,
         str(filename),
-        ExtraArgs={"ContentType": file.content_type},
+        # ExtraArgs={"ContentType": file.content_type},
     )
     return filename
 
