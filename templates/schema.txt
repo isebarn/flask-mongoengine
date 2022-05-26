@@ -3,3 +3,15 @@ table animal {
   id integer [pk, increment]
   name varchar
 }
+
+table dog {
+  id integer [pk, increment]
+  type varchar
+  animal integer [ref: > animal.id]
+}
+
+table cat {
+  id integer [pk, increment]
+  type varchar
+  animal integer [ref: > animal.id]
+}
