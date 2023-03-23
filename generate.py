@@ -11,8 +11,8 @@ humps.pascalize("red_robin")  # RedRobin
 
 list(
     map(
-        lambda x: makedirs("../{}".format(x))
-        if not path.exists("../{}".format(x))
+        lambda x: makedirs("{}".format(x))
+        if not path.exists("{}".format(x))
         else None,
         [
             "extensions",
@@ -22,10 +22,10 @@ list(
     )
 )
 
-extensions = open("../extensions/__init__.py", "w")
+extensions = open("extensions/__init__.py", "w")
 extensions.writelines(["api_list = []\n"])
 for extension in load(open("options.json")).get("extensions", []):
-    system("cp -r extensions/{} ../extensions".format(extension))
+    system("cp -r /home/david/flask-mongoengine/extensions/{} ../extensions".format(extension))
     extensions.writelines(
         [
             "from extensions.{}.api_list import {}\n".format(extension, extension),
@@ -34,14 +34,21 @@ for extension in load(open("options.json")).get("extensions", []):
     )
 
 
-if not path.exists("../endpoints"):
-    makedirs("../endpoints")
+if not path.exists("endpoints"):
+    makedirs("endpoints")
 
-if not path.exists("../models"):
-    makedirs("../models")
+if not path.exists("models"):
+    makedirs("models")
 
-if not path.exists("../models/query_sets"):
-    makedirs("../models/query_sets")    
+if not path.exists("models/query_sets"):
+    makedirs("models/query_sets")
+    query_sets = open("models/query_sets/__init__.py", "w")
+    query_sets.write("from mongoengine import QuerySet\n")
+
+
+if not path.exists("models/triggers"):
+    makedirs("models/triggers")
+    open("models/triggers/__init__.py", "w")
 
 file = open("schema.txt", "r")
 Lines = file.readlines()
@@ -49,12 +56,13 @@ Lines = file.readlines()
 count = 0
 # Strips the newline character
 
-query_sets = open("../models/query_sets/__init__.py", "r")
+query_sets = open("models/query_sets/__init__.py", "r")
+triggers = open("models/triggers/__init__.py", "r")
 
 query_sets = query_sets.readlines()
 
 
-template = open("./_models.txt", "r")
+template = open("/home/david/flask-mongoengine/_models.txt", "r")
 class_string = template.readlines()
 restx_model = []
 
@@ -107,7 +115,7 @@ for line in [x.strip() for x in Lines]:
                     query_sets,
                 )
             ):
-                with open("../models/query_sets/__init__.py", "a") as myfile:
+                with open("models/query_sets/__init__.py", "a") as myfile:
                     myfile.write(
                         "\n\nclass {}QuerySet(QuerySet):\n    pass\n\n".format(
                             humps.pascalize(classname)
@@ -211,6 +219,8 @@ for line in [x.strip() for x in Lines]:
                 class_string.append("DateTimeField()\n")
             elif line.split()[1] == "float":
                 class_string.append("FloatField()\n")
+            elif line.split()[1] == "file":
+                class_string.append("FileField()\n")                
             elif line.split()[1] == "boolean":
                 class_string.append("BooleanField(default=False)\n")
             elif line.split()[1] == "dict":
@@ -221,20 +231,20 @@ for line in [x.strip() for x in Lines]:
                 class_string.append("{}()\n".format(line.split()[1].split(":")[1]))
 
 
-file = open("../models/__init__.py", "w")
+file = open("models/__init__.py", "w")
 file.writelines(class_string)
 
-template = open("./_models_end.txt", "r")
+template = open("/home/david/flask-mongoengine/_models_end.txt", "r")
 class_string = template.readlines()
 file.writelines(class_string)
 
 file.close()
 
 
-api_document = open("./_endpoints.txt", "r")
+api_document = open("/home/david/flask-mongoengine/_endpoints.txt", "r")
 api_document = api_document.readlines()
 
-file = open("../endpoints/__init__.py", "w")
+file = open("endpoints/__init__.py", "w")
 file.writelines(api_document)
 file.writelines(restx_model)
 
@@ -247,7 +257,7 @@ if "// ENDPOINTS\n" in Lines:
 file.writelines("\n\n")
 
 for item in classes:
-    controller_template = open("./_endpoint.txt", "r")
+    controller_template = open("/home/david/flask-mongoengine/_endpoint.txt", "r")
     controller_template = controller_template.readlines()
     controller_template = "".join(controller_template)
     controller_template = controller_template.replace(
@@ -275,8 +285,8 @@ file.close()
 
 
 def initialize_file(source_name, new_name):
-    source = open("./{}".format(source_name), "r")
-    new = open("../{}".format(new_name), "w")
+    source = open("/home/david/flask-mongoengine/{}".format(source_name), "r")
+    new = open("{}".format(new_name), "w")
 
     if not new.readable():
         new.writelines(source)
@@ -289,4 +299,4 @@ initialize_file("main.txt", "main.py")
 # initialize_file(".env", ".env")
 initialize_file("requirements.txt", "requirements.txt")
 
-# system("python3 -m black ../")
+system("python -m black .")

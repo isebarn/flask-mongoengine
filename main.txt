@@ -27,6 +27,7 @@ api.add_namespace(_api)
 for extension in api_list:
 	api.add_namespace(extension)
 
+
 @api.errorhandler(DoesNotExist)
 def handle_no_result_exception(error):
     if ObjectId.is_valid(request.path.split("/")[-1]):
